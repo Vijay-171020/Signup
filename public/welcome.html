@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome Page</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <div class="welcome-container">
+        <h1>Welcome to your Profile</h1>
+        <div class="user-info" id="userInfo">
+            Loading user info...
+        </div>
+        <button onclick="window.location.href='login.html'">Logout</button>
+    </div>
+
+    <script>
+
+        fetch('http://localhost:3000/users')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user data');
+                }
+                return response.json();
+            })
+            .then(users => {
+                const user = JSON.parse(localStorage.getItem('user'));
+                if (!user) {
+                    document.getElementById('userInfo').innerHTML = "User not logged in.";
+                } else {
+                    const dobFormatted = new Date(user.dob).toLocaleDateString();
+                    document.getElementById('userInfo').innerHTML = `
+            👤 <strong>Name:</strong> ${user.name}<br>
+            📧 <strong>Email:</strong> ${user.email}<br>
+            🎂 <strong>Age:</strong> ${user.age}<br>
+            🗓️ <strong>DOB:</strong> ${dobFormatted}
+        `;
+                }
+
+            })
+            .catch(error => {
+                document.getElementById('userInfo').innerHTML = "Error loading user data.";
+                console.error(error);
+            });
+    </script>
+
+</body>
+
+</html>
