@@ -2,6 +2,8 @@ const sendMail = require('../utils/mailer');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
+
 
 exports.createUser = async (req, res) => {
     try {
@@ -67,6 +69,10 @@ exports.loginUser = async (req, res) => {
 
         const isMatch = await bcrypt.compare(password, user.password);
 
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
         if (isMatch) {
             await sendMail({
                 to: user.email,
@@ -75,12 +81,7 @@ exports.loginUser = async (req, res) => {
             });
         }
 
-
-        if (!isMatch) {
-            return res.status(401).json({ error: 'Invalid email or password' });
-        }
-
-        const token = jwt.sign({ id: user._id }, 'your_secret_key', { expiresIn: '1h' });
+        const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
 
         res.json({
             message: 'Login successful',
